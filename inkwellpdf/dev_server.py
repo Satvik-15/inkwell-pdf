@@ -1,5 +1,5 @@
 """
-Browser dev mode: python -m localpdf.dev_server, then open http://127.0.0.1:8765
+Browser dev mode: python -m inkwellpdf.dev_server, then open http://127.0.0.1:8765
 Runs the same interface in a normal browser, which is handy for UI work and tests.
 Only listens on 127.0.0.1.
 """
@@ -26,7 +26,7 @@ class Handler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         if self.path.split("?")[0] == "/dev.js":  # marks the page as browser dev mode
-            body = b"window.LOCALPDF_DEV = true;"
+            body = b"window.INKWELL_DEV = true;"
             self.send_response(200)
             self.send_header("Content-Type", "text/javascript")
             self.send_header("Content-Length", str(len(body)))
@@ -56,7 +56,7 @@ class Handler(SimpleHTTPRequestHandler):
 
 def main(port=8765):
     srv = ThreadingHTTPServer(("127.0.0.1", port), Handler)
-    print(f"LocalPDF dev mode: http://127.0.0.1:{port}")
+    print(f"Inkwell PDF dev mode: http://127.0.0.1:{port}")
     srv.serve_forever()
 
 

@@ -1,21 +1,21 @@
-# LocalPDF
+# Inkwell PDF
 
 **Edit the text in any PDF, in its own font, on your own computer.**
 
-Click a word, type, and click away. LocalPDF rewrites the text in the PDF itself, using the same font, size and colour as the original. Nothing is uploaded. There's no account and no tracking.
+Click a word, type, and click away. Inkwell PDF rewrites the text in the PDF itself, using the same font, size and colour as the original. Nothing is uploaded. There's no account and no tracking.
 
-![Editing an amount on an invoice in LocalPDF](docs/editing-light.png)
+![Editing an amount on an invoice in Inkwell PDF](docs/editing-light.png)
 
 ## Download
 
 Get the installer for your computer from **[Releases](../../releases)**. No Python or anything else is needed.
 
-**Mac:** download `LocalPDF-…-macOS-arm64.dmg` for Apple silicon (M1 and later) or `…-x86_64.dmg` for Intel. Open it and drag LocalPDF into Applications. The app isn't signed by Apple yet, so the first time you open it macOS will block it:
+**Mac:** download `InkwellPDF-…-macOS-arm64.dmg` for Apple silicon (M1 and later) or `…-x86_64.dmg` for Intel. Open it and drag Inkwell PDF into Applications. The app isn't signed by Apple yet, so the first time you open it macOS will block it:
 
-1. Try to open LocalPDF once, then close the warning.
-2. Open **System Settings → Privacy & Security**, scroll down, and click **Open Anyway** next to LocalPDF.
+1. Try to open Inkwell PDF once, then close the warning.
+2. Open **System Settings → Privacy & Security**, scroll down, and click **Open Anyway** next to Inkwell PDF.
 
-**Windows:** download `LocalPDF-…-Windows-Setup.exe` and run it. It installs for your user account, so you don't need administrator rights, and adds LocalPDF to the Start menu and to "Open with" for PDFs. Windows SmartScreen may warn about an unrecognised app: click **More info → Run anyway**.
+**Windows:** download `InkwellPDF-…-Windows-Setup.exe` and run it. It installs for your user account, so you don't need administrator rights, and adds Inkwell PDF to the Start menu and to "Open with" for PDFs. Windows SmartScreen may warn about an unrecognised app: click **More info → Run anyway**.
 
 ## How to use it
 
@@ -39,10 +39,10 @@ While you type, a small label shows which font the new text will use:
 
 ## How "same font" works
 
-PDFs usually carry only the letters they use. Type a letter the file doesn't have, and most editors swap the whole line to Helvetica. LocalPDF picks a font per character instead, in this order:
+PDFs usually carry only the letters they use. Type a letter the file doesn't have, and most editors swap the whole line to Helvetica. Inkwell PDF picks a font per character instead, in this order:
 
 1. The font embedded in the PDF.
-2. The full version of that font, from the app's `fonts` folder, `~/LocalPDF Fonts`, or the fonts installed on your Mac.
+2. The full version of that font, from the app's `fonts` folder, `~/Inkwell PDF Fonts`, or the fonts installed on your Mac.
 3. A similar font, only for characters neither of the above has.
 
 Old text is actually removed from the file, not covered with a white box. Backgrounds, table lines and images stay untouched.
@@ -58,11 +58,11 @@ Old text is actually removed from the file, not covered with a white box. Backgr
 ## Run from source
 
 ```bash
-git clone <this repo> && cd localpdf
+git clone https://github.com/<you>/inkwell-pdf && cd inkwell-pdf
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-python -m localpdf            # the desktop app
-python -m localpdf some.pdf   # open a file straight away
+python -m inkwellpdf            # the desktop app
+python -m inkwellpdf some.pdf   # open a file straight away
 ```
 
 ## Develop
@@ -70,9 +70,9 @@ python -m localpdf some.pdf   # open a file straight away
 ```bash
 pip install -e ".[dev]"
 pytest                          # engine tests
-python -m localpdf.dev_server   # the same interface in a browser at http://127.0.0.1:8765
-./scripts/build_macos.sh        # on a Mac: dist/LocalPDF.app and a .dmg
-./scripts/build_windows.ps1     # on Windows (needs Inno Setup 6): dist/LocalPDF-…-Windows-Setup.exe
+python -m inkwellpdf.dev_server   # the same interface in a browser at http://127.0.0.1:8765
+./scripts/build_macos.sh        # on a Mac: dist/Inkwell PDF.app and a .dmg
+./scripts/build_windows.ps1     # on Windows (needs Inno Setup 6): dist/InkwellPDF-…-Windows-Setup.exe
 ```
 
 Pushing a tag such as `v0.1.0` builds the Mac (Apple silicon and Intel) and Windows installers on GitHub Actions and attaches them to a release. To test the builds without releasing, open **Actions → Release → Run workflow**; the installers appear as downloadable artifacts.
@@ -81,12 +81,12 @@ Both build scripts finish by running the packaged app with `--self-test`, which 
 
 | File | What it does |
 |---|---|
-| `localpdf/engine.py` | Reads text runs, chooses fonts, removes and rewrites text, saves. No UI code |
-| `localpdf/api.py` | JSON bridge between the interface and the engine |
-| `localpdf/desktop.py` | Native window (pywebview: WebKit on macOS, WebView2 on Windows) |
-| `localpdf/dev_server.py` | Serves the interface to a browser for development |
-| `localpdf/web/` | The interface: plain HTML, CSS and JavaScript with no build step |
+| `inkwellpdf/engine.py` | Reads text runs, chooses fonts, removes and rewrites text, saves. No UI code |
+| `inkwellpdf/api.py` | JSON bridge between the interface and the engine |
+| `inkwellpdf/desktop.py` | Native window (pywebview: WebKit on macOS, WebView2 on Windows) |
+| `inkwellpdf/dev_server.py` | Serves the interface to a browser for development |
+| `inkwellpdf/web/` | The interface: plain HTML, CSS and JavaScript with no build step |
 
 ## Licence
 
-LocalPDF is free software under the [GNU AGPL v3.0](LICENSE), because it's built on [PyMuPDF](https://github.com/pymupdf/PyMuPDF), which uses the same licence. Bundled fonts and icons keep their own licences; see [NOTICE.md](NOTICE.md).
+Inkwell PDF is free software under the [GNU AGPL v3.0](LICENSE), because it's built on [PyMuPDF](https://github.com/pymupdf/PyMuPDF), which uses the same licence. Bundled fonts and icons keep their own licences; see [NOTICE.md](NOTICE.md).

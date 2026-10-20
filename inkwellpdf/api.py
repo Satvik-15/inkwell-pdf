@@ -19,7 +19,7 @@ import pymupdf as fitz
 
 from .engine import PDFEditor
 
-CONFIG_DIR = Path.home() / ".localpdf"
+CONFIG_DIR = Path.home() / ".inkwellpdf"
 RECENT_FILE = CONFIG_DIR / "recent.json"
 
 
@@ -108,7 +108,7 @@ class Api:
 
     def open_upload(self, name, data_b64):
         """Browser dev mode: the file arrives as bytes."""
-        tmp = Path(tempfile.mkdtemp(prefix="localpdf-")) / Path(name).name
+        tmp = Path(tempfile.mkdtemp(prefix="inkwellpdf-")) / Path(name).name
         tmp.write_bytes(base64.b64decode(data_b64))
         return self.open_path(str(tmp))
 

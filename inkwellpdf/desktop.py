@@ -38,7 +38,7 @@ def self_test() -> int:
     res = ed.replace_run(ed.runs(0)[0], "Total 4,750 Zq")
     ed.save(str(tmp / "out.pdf"))
     ok = res.ok and "Total 4,750 Zq" in fitz.open(tmp / "out.pdf")[0].get_text() and WEB.exists()
-    print("LocalPDF self-test:", "OK" if ok else f"FAILED {res}")
+    print("Inkwell PDF self-test:", "OK" if ok else f"FAILED {res}")
     return 0 if ok else 1
 
 
@@ -50,14 +50,14 @@ def main():
 
     api = Api()
     window = webview.create_window(
-        "LocalPDF", url=str(WEB), js_api=api,
+        "Inkwell PDF", url=str(WEB), js_api=api,
         width=1280, height=860, min_size=(820, 560), background_color="#F7F7F5",
     )
     api.window = window
     state = {"closing_ok": False, "asking": False}
 
     def show_opened(st):
-        window.evaluate_js(f"window.LocalPDF && window.LocalPDF.opened({json.dumps(st)})")
+        window.evaluate_js(f"window.Inkwell && window.Inkwell.opened({json.dumps(st)})")
 
     def on_drop(e):
         files = e.get("dataTransfer", {}).get("files", [])
@@ -97,8 +97,8 @@ def main():
         if pdf_arg:
             show_opened(api.open_path(pdf_arg))
             time.sleep(4)
-        print("LocalPDF probe:", window.evaluate_js(
-            "JSON.stringify({ui: !!window.LocalPDF, bridge: !!window.pywebview,"
+        print("Inkwell PDF probe:", window.evaluate_js(
+            "JSON.stringify({ui: !!window.Inkwell, bridge: !!window.pywebview,"
             " pages: document.querySelectorAll('.page img').length,"
             " runs: document.querySelectorAll('.run').length})"), flush=True)
         if api.editor:
@@ -107,7 +107,7 @@ def main():
             t = time.time()
             api.commit(0, 0, api.editor.runs(0)[0].text + " ok")
             res = api.save()
-            print(f"LocalPDF probe save: {'OK' if res.get('path') else res} in {time.time() - t:.1f}s", flush=True)
+            print(f"Inkwell PDF probe save: {'OK' if res.get('path') else res} in {time.time() - t:.1f}s", flush=True)
         state["closing_ok"] = True
         window.destroy()
 

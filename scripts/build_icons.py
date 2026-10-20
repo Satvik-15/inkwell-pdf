@@ -1,9 +1,9 @@
-"""Bundle the SVG icons in localpdf/web/icons into web/icons.js (no network needed at runtime)."""
+"""Bundle the SVG icons in inkwellpdf/web/icons into web/icons.js (no network needed at runtime)."""
 import json
 import re
 from pathlib import Path
 
-web = Path(__file__).resolve().parent.parent / "localpdf" / "web"
+web = Path(__file__).resolve().parent.parent / "inkwellpdf" / "web"
 icons = {}
 for f in sorted((web / "icons").glob("*.svg")):
     inner = re.search(r">\s*(.*)</svg>", f.read_text(), re.S).group(1)

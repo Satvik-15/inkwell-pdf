@@ -4,9 +4,9 @@ from pathlib import Path
 import pymupdf as fitz
 import pytest
 
-from localpdf.engine import EXACT, FALLBACK, SAME, PDFEditor
+from inkwellpdf.engine import EXACT, FALLBACK, SAME, PDFEditor
 
-FONTS = Path(__file__).resolve().parent.parent / "localpdf" / "fonts"
+FONTS = Path(__file__).resolve().parent.parent / "inkwellpdf" / "fonts"
 
 
 def subset(font_file, text, out):

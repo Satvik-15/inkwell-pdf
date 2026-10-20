@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "localpdf"
+name = "inkwellpdf"
 version = "0.1.0"
 description = "Edit the text in any PDF, in its own font, on your own computer."
 readme = "README.md"
@@ -19,13 +19,13 @@ dependencies = [
 dev = ["pytest>=8", "playwright>=1.40"]
 
 [project.scripts]
-localpdf = "localpdf.desktop:main"
+inkwellpdf = "inkwellpdf.desktop:main"
 
 [tool.setuptools]
-packages = ["localpdf"]
+packages = ["inkwellpdf"]
 
 [tool.setuptools.package-data]
-localpdf = ["web/*", "web/icons/*", "fonts/*"]
+inkwellpdf = ["web/*", "web/icons/*", "fonts/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

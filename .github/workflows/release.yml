@@ -35,7 +35,7 @@ jobs:
       - run: ./scripts/build_macos.sh
       - uses: actions/upload-artifact@v4
         with:
-          name: LocalPDF-macOS-${{ matrix.runner }}
+          name: InkwellPDF-macOS-${{ matrix.runner }}
           path: dist/*.dmg
 
   windows:
@@ -52,7 +52,7 @@ jobs:
         shell: pwsh
       - uses: actions/upload-artifact@v4
         with:
-          name: LocalPDF-Windows
+          name: InkwellPDF-Windows
           path: dist/*-Setup.exe
 
   release:

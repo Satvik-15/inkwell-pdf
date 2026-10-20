@@ -1,10 +1,10 @@
-/* LocalPDF interface. Talks to Python through window.pywebview.api (desktop)
+/* Inkwell PDF interface. Talks to Python through window.pywebview.api (desktop)
    or /api/<method> (browser dev mode). */
 (() => {
   "use strict";
 
   // ------------------------------------------------------------- bridge
-  const isDesktop = () => !window.LOCALPDF_DEV && !!(window.pywebview && window.pywebview.api);
+  const isDesktop = () => !window.INKWELL_DEV && !!(window.pywebview && window.pywebview.api);
   async function call(name, ...args) {
     if (isDesktop()) return window.pywebview.api[name](...args);
     const r = await fetch(`/api/${name}`, { method: "POST", body: JSON.stringify(args) });
@@ -299,7 +299,7 @@
     $("#btn-undo").disabled = !d.canUndo;
     $("#btn-redo").disabled = !d.canRedo;
     $("#save-label").textContent = d.savePath && d.dirty ? "Save" : "Save copy";
-    document.title = `${d.dirty ? "• " : ""}${d.name} — LocalPDF`;
+    document.title = `${d.dirty ? "• " : ""}${d.name} — Inkwell PDF`;
     markEditedThumbs();
   }
 
@@ -709,8 +709,8 @@
     if (st.open) opened(st); else showWelcome(st);
   }
 
-  window.LocalPDF = { opened, state: S };
-  // Desktop: wait for pywebview to inject its API. Browser dev mode: dev.js sets LOCALPDF_DEV.
-  if (window.LOCALPDF_DEV || window.pywebview) start();
+  window.Inkwell = { opened, state: S };
+  // Desktop: wait for pywebview to inject its API. Browser dev mode: dev.js sets INKWELL_DEV.
+  if (window.INKWELL_DEV || window.pywebview) start();
   else window.addEventListener("pywebviewready", start, { once: true });
 })();

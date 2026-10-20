@@ -6,7 +6,7 @@ import pymupdf as fitz
 from fontTools import subset as fts
 
 ROOT = Path(__file__).resolve().parent.parent
-FONTS = ROOT / "localpdf" / "fonts"
+FONTS = ROOT / "inkwellpdf" / "fonts"
 INK, MUTED, LINE, FILL = (0.15, 0.16, 0.2), (0.45, 0.46, 0.5), (0.88, 0.88, 0.9), (0.965, 0.965, 0.975)
 
 ROWS = [("Brand identity workshop", "1", "45,000"), ("Logo and wordmark", "1", "60,000"),

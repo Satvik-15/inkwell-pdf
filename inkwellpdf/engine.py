@@ -1,5 +1,5 @@
 """
-LocalPDF editing engine (no UI code here).
+Inkwell PDF editing engine (no UI code here).
 
 One edit works like this:
   1. find the text run (same font, size and colour) the user clicked
@@ -26,11 +26,11 @@ from pathlib import Path
 import pymupdf as fitz
 
 if getattr(sys, "_MEIPASS", None):  # inside the packaged app
-    PKG_DIR = Path(sys._MEIPASS) / "localpdf"
+    PKG_DIR = Path(sys._MEIPASS) / "inkwellpdf"
 else:
     PKG_DIR = Path(__file__).resolve().parent
 BUNDLED_FONT_DIR = PKG_DIR / "fonts"
-USER_FONT_DIR = Path.home() / "LocalPDF Fonts"  # drop extra .ttf/.otf files here
+USER_FONT_DIR = Path.home() / "Inkwell PDF Fonts"  # drop extra .ttf/.otf files here
 SYSTEM_FONT_DIRS = [
     Path("/System/Library/Fonts"),
     Path("/System/Library/Fonts/Supplemental"),
