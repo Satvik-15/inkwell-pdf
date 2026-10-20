@@ -1,0 +1,88 @@
+# LocalPDF
+
+**Edit the text in any PDF, in its own font, on your own computer.**
+
+Click a word, type, and click away. LocalPDF rewrites the text in the PDF itself, using the same font, size and colour as the original. Nothing is uploaded. There's no account and no tracking.
+
+![Editing an amount on an invoice in LocalPDF](docs/editing-light.png)
+
+## Download
+
+Get the latest `LocalPDF-…-macOS.dmg` from **[Releases](../../releases)**, open it, and drag LocalPDF into Applications.
+
+The app isn't signed by Apple yet, so the first time you open it macOS will block it:
+
+1. Try to open LocalPDF once, then close the warning.
+2. Open **System Settings → Privacy & Security**, scroll down, and click **Open Anyway** next to LocalPDF.
+
+Or run this once in Terminal: `xattr -dr com.apple.quarantine /Applications/LocalPDF.app`
+
+## How to use it
+
+| To | Do this |
+|---|---|
+| Open a PDF | Drop it on the window, or press ⌘O |
+| Edit text | Click it and type. Click anywhere else to keep the change |
+| Cancel an edit in progress | Esc |
+| Move to the next line | Tab |
+| Find and replace | ⌘F |
+| Undo / redo | ⌘Z / ⇧⌘Z |
+| Save | ⌘S saves a copy next to your file; your original is never changed |
+| Everything else | ⌘K |
+
+While you type, a small label shows which font the new text will use:
+
+- **Green:** the PDF's own font. It looks exactly like the original.
+- **Orange:** a few characters aren't in that font, so a similar font draws just those characters.
+- **Red:** no font on your computer can draw a character, so the change can't be made.
+
+## How "same font" works
+
+PDFs usually carry only the letters they use. Type a letter the file doesn't have, and most editors swap the whole line to Helvetica. LocalPDF picks a font per character instead, in this order:
+
+1. The font embedded in the PDF.
+2. The full version of that font, from the app's `fonts` folder, `~/LocalPDF Fonts`, or the fonts installed on your Mac.
+3. A similar font, only for characters neither of the above has.
+
+Old text is actually removed from the file, not covered with a white box. Backgrounds, table lines and images stay untouched.
+
+## Limits
+
+- **Scanned PDFs:** these are pictures of text, so there's nothing to edit.
+- **Rotated text:** not supported yet.
+- **Longer text:** a longer replacement doesn't push the rest of a paragraph along. You'll see a warning if it runs into nearby text.
+- **Unlabelled symbols:** some PDFs draw symbols, like `₹` in Chrome-printed files, without saying which character they are. Lines containing them are locked so they can't be damaged.
+- **Platforms:** only macOS is packaged so far. The code also runs on Windows and Linux from source.
+
+## Run from source
+
+```bash
+git clone <this repo> && cd localpdf
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python -m localpdf            # the desktop app
+python -m localpdf some.pdf   # open a file straight away
+```
+
+## Develop
+
+```bash
+pip install -e ".[dev]"
+pytest                          # engine tests
+python -m localpdf.dev_server   # the same interface in a browser at http://127.0.0.1:8765
+./scripts/build_macos.sh        # build dist/LocalPDF.app and a .dmg (on a Mac)
+```
+
+Pushing a tag such as `v0.1.0` builds the Mac app on GitHub Actions and attaches the `.dmg` to a release.
+
+| File | What it does |
+|---|---|
+| `localpdf/engine.py` | Reads text runs, chooses fonts, removes and rewrites text, saves. No UI code |
+| `localpdf/api.py` | JSON bridge between the interface and the engine |
+| `localpdf/desktop.py` | Native window (pywebview: WebKit on macOS) |
+| `localpdf/dev_server.py` | Serves the interface to a browser for development |
+| `localpdf/web/` | The interface: plain HTML, CSS and JavaScript with no build step |
+
+## Licence
+
+LocalPDF is free software under the [GNU AGPL v3.0](LICENSE), because it's built on [PyMuPDF](https://github.com/pymupdf/PyMuPDF), which uses the same licence. Bundled fonts and icons keep their own licences; see [NOTICE.md](NOTICE.md).

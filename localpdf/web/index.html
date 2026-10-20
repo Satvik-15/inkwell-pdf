@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LocalPDF</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<!-- Welcome: shown until a PDF is open -->
+<main id="welcome" class="welcome">
+  <div class="welcome-inner">
+    <div class="mark" aria-hidden="true"><i data-icon="file-text"></i></div>
+    <h1>Edit any PDF, in its own font</h1>
+    <p class="lede">Click a word, type, done. Your files never leave this computer.</p>
+    <button id="dropzone" class="dropzone" type="button">
+      <i data-icon="file-upload"></i>
+      <span class="dz-title">Drop a PDF here</span>
+      <span class="dz-sub">or click to choose a file</span>
+    </button>
+    <section id="recent" class="recent" hidden>
+      <h2>Recent</h2>
+      <ul id="recent-list"></ul>
+    </section>
+    <ul class="hints">
+      <li><kbd>Click</kbd> any text to edit it</li>
+      <li><kbd>Esc</kbd> to undo a change in progress</li>
+      <li><kbd data-mod>⌘</kbd><kbd>K</kbd> for every command</li>
+    </ul>
+  </div>
+</main>
+
+<!-- Editor: shown once a PDF is open -->
+<div id="editor-ui" class="editor-ui" hidden>
+  <header class="topbar">
+    <button class="icon-btn" id="btn-sidebar" title="Toggle pages (⌘\)" aria-label="Toggle pages"><i data-icon="layout-sidebar-left-collapse"></i></button>
+    <div class="doc-title">
+      <span id="doc-name" class="doc-name"></span>
+      <span id="doc-status" class="doc-status"></span>
+    </div>
+    <span class="local-pill" title="Nothing is uploaded. Everything happens on this computer."><i data-icon="lock"></i>On this computer</span>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="btn-undo" title="Undo (⌘Z)" aria-label="Undo"><i data-icon="arrow-back-up"></i></button>
+    <button class="icon-btn" id="btn-redo" title="Redo (⇧⌘Z)" aria-label="Redo"><i data-icon="arrow-forward-up"></i></button>
+    <button class="icon-btn" id="btn-find" title="Find and replace (⌘F)" aria-label="Find and replace"><i data-icon="search"></i></button>
+    <div class="zoom">
+      <button class="icon-btn" id="btn-zoom-out" title="Zoom out (⌘−)" aria-label="Zoom out"><i data-icon="zoom-out"></i></button>
+      <button class="zoom-value" id="btn-zoom-fit" title="Fit to width (⌘0)">100%</button>
+      <button class="icon-btn" id="btn-zoom-in" title="Zoom in (⌘+)" aria-label="Zoom in"><i data-icon="zoom-in"></i></button>
+    </div>
+    <button class="cmdk-btn" id="btn-cmdk" title="All commands"><span data-mod>⌘</span>K</button>
+    <button class="primary" id="btn-save"><i data-icon="download"></i><span id="save-label">Save copy</span></button>
+  </header>
+
+  <div id="findbar" class="findbar" hidden>
+    <i data-icon="search"></i>
+    <input id="find-input" placeholder="Find" autocomplete="off" spellcheck="false">
+    <span id="find-count" class="find-count"></span>
+    <button class="icon-btn small" id="find-prev" aria-label="Previous match"><i data-icon="chevron-up"></i></button>
+    <button class="icon-btn small" id="find-next" aria-label="Next match"><i data-icon="chevron-down"></i></button>
+    <span class="sep"></span>
+    <i data-icon="replace"></i>
+    <input id="replace-input" placeholder="Replace with" autocomplete="off" spellcheck="false">
+    <button class="toggle" id="find-case" title="Match case" aria-pressed="false">Aa</button>
+    <button class="secondary" id="replace-all">Replace all</button>
+    <button class="icon-btn small" id="find-close" aria-label="Close find"><i data-icon="x"></i></button>
+  </div>
+
+  <div class="workspace">
+    <nav id="sidebar" class="sidebar" aria-label="Pages"></nav>
+    <div id="canvas" class="canvas"><div id="pages" class="pages"></div></div>
+  </div>
+</div>
+
+<!-- Command palette -->
+<div id="palette" class="palette-backdrop" hidden>
+  <div class="palette" role="dialog" aria-label="Commands">
+    <input id="palette-input" placeholder="Type a command or a page number" autocomplete="off" spellcheck="false">
+    <ul id="palette-list" role="listbox"></ul>
+  </div>
+</div>
+
+<div id="drop-overlay" class="drop-overlay" hidden><div>Drop to open</div></div>
+<div id="toasts" class="toasts" aria-live="polite"></div>
+<input type="file" id="file-input" accept="application/pdf,.pdf" hidden>
+
+<script src="dev.js" onerror="void 0"></script>
+<script src="icons.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
