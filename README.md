@@ -75,7 +75,7 @@ python -m inkwellpdf.dev_server   # the same interface in a browser at http://12
 ./scripts/build_windows.ps1     # on Windows (needs Inno Setup 6): dist/InkwellPDF-…-Windows-Setup.exe
 ```
 
-Pushing a tag such as `v0.1.0` builds the Mac (Apple silicon and Intel) and Windows installers on GitHub Actions and attaches them to a release. To test the builds without releasing, open **Actions → Release → Run workflow**; the installers appear as downloadable artifacts.
+Publishing a release on GitHub (**Releases → Draft a new release**, with a tag such as `v0.1.0`) builds the Mac (Apple silicon and Intel) and Windows installers on GitHub Actions and attaches them to that release. To test the builds without releasing, open **Actions → Release → Run workflow**; the installers appear as downloadable artifacts.
 
 Both build scripts finish by running the packaged app with `--self-test`, which opens, edits and saves a PDF, so a broken package fails the build.
 

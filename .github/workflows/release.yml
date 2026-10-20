@@ -1,10 +1,11 @@
 name: Release
 
-# Push a tag like v0.1.0 to build installers and publish a GitHub release.
+# Publish a release on GitHub (Releases → Draft a new release, tag like v0.1.0) and this
+# builds the Mac and Windows installers and attaches them to it.
 # Run it by hand from the Actions tab ("Run workflow") to test the builds without releasing.
 on:
-  push:
-    tags: ["v*"]
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions:
@@ -67,4 +68,4 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           files: installers/*
-          generate_release_notes: true
+          tag_name: ${{ github.event.release.tag_name }}
