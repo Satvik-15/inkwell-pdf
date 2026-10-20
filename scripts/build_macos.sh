@@ -1,24 +1,35 @@
 #!/bin/bash
-# Builds dist/LocalPDF.app and dist/LocalPDF-<version>-macOS.dmg on a Mac.
+# Builds dist/LocalPDF.app and dist/LocalPDF-<version>-macOS-<arch>.dmg on a Mac.
+# Uses python3.12/3.13 if installed (best PyInstaller support), else python3.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-VERSION=$(python3 -c "import re;print(re.search(r'__version__ = \"(.+)\"', open('localpdf/__init__.py').read())[1])")
+VERSION=$(sed -n 's/^__version__ = "\(.*\)"/\1/p' localpdf/__init__.py)
+ARCH=$(uname -m)
+PY=$(command -v python3.13 || command -v python3.12 || command -v python3)
+echo "Building LocalPDF $VERSION for $ARCH with $($PY --version)"
 
-python3 -m venv .build-venv
+rm -rf .build-venv build dist
+"$PY" -m venv .build-venv
 .build-venv/bin/pip install -q --upgrade pip
-.build-venv/bin/pip install -q -r requirements.txt pyinstaller
+.build-venv/bin/pip install -q -r requirements.txt pyinstaller pillow
 
 .build-venv/bin/pyinstaller --noconfirm --clean --windowed --name LocalPDF \
+  --icon assets/icon.png \
   --osx-bundle-identifier io.github.localpdf \
   --add-data "localpdf/web:localpdf/web" \
   --add-data "localpdf/fonts:localpdf/fonts" \
   --collect-submodules webview \
   run_localpdf.py
 
-DMG="dist/LocalPDF-${VERSION}-macOS.dmg"
-rm -f "$DMG"
+# app metadata Finder shows
+/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" dist/LocalPDF.app/Contents/Info.plist
+/usr/libexec/PlistBuddy -c "Add :NSHumanReadableCopyright string 'Free software, GNU AGPL v3'" dist/LocalPDF.app/Contents/Info.plist || true
+codesign --force --deep --sign - dist/LocalPDF.app   # ad-hoc signature (needed after editing Info.plist)
+
+DMG="dist/LocalPDF-${VERSION}-macOS-${ARCH}.dmg"
 STAGE=$(mktemp -d)
 cp -R dist/LocalPDF.app "$STAGE/"
 ln -s /Applications "$STAGE/Applications"
-hdiutil create -volname "LocalPDF" -srcfolder "$STAGE" -ov -format UDZO "$DMG"
+hdiutil create -volname "LocalPDF" -srcfolder "$STAGE" -ov -format UDZO "$DMG" >/dev/null
+rm -rf "$STAGE"
 echo "Built $DMG"
