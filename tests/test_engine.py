@@ -117,3 +117,29 @@ def test_unlabeled_glyphs_are_locked(sample_pdf):
     assert not r.editable
     res = e.replace_run(r, "Total 0")
     assert not res.ok
+
+
+@pytest.mark.parametrize("over_original", [False, True])
+def test_edits_after_saving_keep_new_characters(sample_pdf, tmp_path, over_original):
+    """Saving trims fonts in the written file only. A later edit may need characters the
+    first save didn't (regression: they disappeared from the second saved file)."""
+    e = PDFEditor(sample_pdf)
+    e.replace_run(run_with(e, "Invoice 1043"), "Invoice 1043 Q")      # loads the full bold font
+    first = sample_pdf if over_original else tmp_path / "first.pdf"
+    e.save(str(first))
+    e.replace_run(run_with(e, "Invoice 1043 Q"), "Invoice JQXZ 7")     # characters not in that save
+    assert "Invoice JQXZ 7" in e.doc[0].get_text()
+    second = tmp_path / "second.pdf"
+    e.save(str(second))
+    assert "Invoice JQXZ 7" in fitz.open(second)[0].get_text()
+
+
+def test_saving_leaves_open_document_unchanged(sample_pdf, tmp_path):
+    e = PDFEditor(sample_pdf)
+    e.replace_run(run_with(e, "Total due"), "Total due (incl. GST)")
+    def font_sizes(doc):
+        return sorted(len(doc.extract_font(f[0])[3] or b"") for f in doc[0].get_fonts(full=True))
+    before = font_sizes(e.doc)
+    e.save(str(tmp_path / "copy.pdf"))
+    assert font_sizes(e.doc) == before                      # nothing trimmed in the open document
+    assert font_sizes(fitz.open(tmp_path / "copy.pdf")) < before  # the saved file is trimmed

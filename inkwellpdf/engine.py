@@ -582,17 +582,27 @@ class PDFEditor:
 
     # ----------------------------------------------------------------- saving
     def save(self, out_path: str):
+        """Write the document to out_path with fonts trimmed to the characters used.
+
+        Trimming happens on a copy. The open document keeps its full fonts, so later
+        edits can still use characters the saved file doesn't need.
+        """
+        raw = self.doc.tobytes()
+        copy = fitz.open("pdf", raw)
         try:
-            self.doc.subset_fonts()
+            copy.subset_fonts()
         except Exception:
             pass
         same = os.path.abspath(out_path) == os.path.abspath(self.path)
         target = out_path + ".tmp" if same else out_path
-        self.doc.save(target, garbage=3, deflate=True)
+        copy.save(target, garbage=3, deflate=True)
+        copy.close()
         if same:
+            # release the file before replacing it (Windows locks open files), then keep
+            # editing the untrimmed version in memory
             self.doc.close()
             os.replace(target, out_path)
-            self.doc = fitz.open(out_path)
+            self.doc = fitz.open("pdf", raw)
             self._emb.clear()
             self._runs.clear()
         self.dirty = False
