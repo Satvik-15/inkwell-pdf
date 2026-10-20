@@ -14,7 +14,7 @@ from .api import Api
 
 WEB = Path(__file__).resolve().parent / "web"
 API = Api()
-ALLOWED = {name for name in dir(Api) if not name.startswith("_") and name not in ("open_dialog",)}
+ALLOWED = {name for name in dir(Api) if not name.startswith("_") and name not in ("open_dialog", "reveal")}
 
 
 class Handler(SimpleHTTPRequestHandler):

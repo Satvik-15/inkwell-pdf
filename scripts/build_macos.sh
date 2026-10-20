@@ -19,7 +19,18 @@ rm -rf .build-venv build dist
   --add-data "localpdf/web:localpdf/web" \
   --add-data "localpdf/fonts:localpdf/fonts" \
   --collect-submodules webview \
+  --exclude-module pymupdf.layout --exclude-module pymupdf_layout --exclude-module pymupdf4llm \
+  --exclude-module onnxruntime --exclude-module networkx --exclude-module tabulate --exclude-module numpy \
   run_localpdf.py
+
+# fail the build if the packaged app can't open, edit and save a PDF
+dist/LocalPDF.app/Contents/MacOS/LocalPDF --self-test
+
+# open the real window with the sample, edit, save, quit (warns only: CI may have no screen)
+dist/LocalPDF.app/Contents/MacOS/LocalPDF --probe "$PWD/docs/sample-invoice.pdf" > build/probe.log 2>&1 & PROBE=$!
+for _ in $(seq 1 45); do sleep 1; kill -0 $PROBE 2>/dev/null || break; done
+kill $PROBE 2>/dev/null || true
+if grep -q "probe save: OK" build/probe.log; then echo "Window probe: OK"; else echo "WARNING: window probe didn't finish:"; tail -5 build/probe.log; fi
 
 # app metadata Finder shows
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" dist/LocalPDF.app/Contents/Info.plist

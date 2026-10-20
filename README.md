@@ -8,14 +8,14 @@ Click a word, type, and click away. LocalPDF rewrites the text in the PDF itself
 
 ## Download
 
-Get the latest `LocalPDF-…-macOS.dmg` from **[Releases](../../releases)**, open it, and drag LocalPDF into Applications.
+Get the installer for your computer from **[Releases](../../releases)**. No Python or anything else is needed.
 
-The app isn't signed by Apple yet, so the first time you open it macOS will block it:
+**Mac:** download `LocalPDF-…-macOS-arm64.dmg` for Apple silicon (M1 and later) or `…-x86_64.dmg` for Intel. Open it and drag LocalPDF into Applications. The app isn't signed by Apple yet, so the first time you open it macOS will block it:
 
 1. Try to open LocalPDF once, then close the warning.
 2. Open **System Settings → Privacy & Security**, scroll down, and click **Open Anyway** next to LocalPDF.
 
-Or run this once in Terminal: `xattr -dr com.apple.quarantine /Applications/LocalPDF.app`
+**Windows:** download `LocalPDF-…-Windows-Setup.exe` and run it. It installs for your user account, so you don't need administrator rights, and adds LocalPDF to the Start menu and to "Open with" for PDFs. Windows SmartScreen may warn about an unrecognised app: click **More info → Run anyway**.
 
 ## How to use it
 
@@ -27,7 +27,8 @@ Or run this once in Terminal: `xattr -dr com.apple.quarantine /Applications/Loca
 | Move to the next line | Tab |
 | Find and replace | ⌘F |
 | Undo / redo | ⌘Z / ⇧⌘Z |
-| Save | ⌘S saves a copy next to your file; your original is never changed |
+| Save | ⌘S saves `<name> (edited).pdf` next to your file, and later saves update it. Your original is never changed |
+| Save somewhere else | ⇧⌘S |
 | Everything else | ⌘K |
 
 While you type, a small label shows which font the new text will use:
@@ -52,7 +53,7 @@ Old text is actually removed from the file, not covered with a white box. Backgr
 - **Rotated text:** not supported yet.
 - **Longer text:** a longer replacement doesn't push the rest of a paragraph along. You'll see a warning if it runs into nearby text.
 - **Unlabelled symbols:** some PDFs draw symbols, like `₹` in Chrome-printed files, without saying which character they are. Lines containing them are locked so they can't be damaged.
-- **Platforms:** only macOS is packaged so far. The code also runs on Windows and Linux from source.
+- **Platforms:** installers for macOS and Windows. Linux runs from source.
 
 ## Run from source
 
@@ -70,16 +71,19 @@ python -m localpdf some.pdf   # open a file straight away
 pip install -e ".[dev]"
 pytest                          # engine tests
 python -m localpdf.dev_server   # the same interface in a browser at http://127.0.0.1:8765
-./scripts/build_macos.sh        # build dist/LocalPDF.app and a .dmg (on a Mac)
+./scripts/build_macos.sh        # on a Mac: dist/LocalPDF.app and a .dmg
+./scripts/build_windows.ps1     # on Windows (needs Inno Setup 6): dist/LocalPDF-…-Windows-Setup.exe
 ```
 
-Pushing a tag such as `v0.1.0` builds the Mac app on GitHub Actions and attaches the `.dmg` to a release.
+Pushing a tag such as `v0.1.0` builds the Mac (Apple silicon and Intel) and Windows installers on GitHub Actions and attaches them to a release. To test the builds without releasing, open **Actions → Release → Run workflow**; the installers appear as downloadable artifacts.
+
+Both build scripts finish by running the packaged app with `--self-test`, which opens, edits and saves a PDF, so a broken package fails the build.
 
 | File | What it does |
 |---|---|
 | `localpdf/engine.py` | Reads text runs, chooses fonts, removes and rewrites text, saves. No UI code |
 | `localpdf/api.py` | JSON bridge between the interface and the engine |
-| `localpdf/desktop.py` | Native window (pywebview: WebKit on macOS) |
+| `localpdf/desktop.py` | Native window (pywebview: WebKit on macOS, WebView2 on Windows) |
 | `localpdf/dev_server.py` | Serves the interface to a browser for development |
 | `localpdf/web/` | The interface: plain HTML, CSS and JavaScript with no build step |
 

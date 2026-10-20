@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import base64
 import json
+import os
+import sys
 import tempfile
 import threading
 from pathlib import Path
@@ -114,7 +116,9 @@ class Api:
         if not self.window:
             return {"cancelled": True}
         import webview
-        res = self.window.create_file_dialog(webview.OPEN_DIALOG, file_types=("PDF files (*.pdf)",))
+        self._front()
+        kind = getattr(getattr(webview, "FileDialog", None), "OPEN", None) or webview.OPEN_DIALOG
+        res = self.window.create_file_dialog(kind, file_types=("PDF files (*.pdf)",))
         if not res:
             return {"cancelled": True}
         return self.open_path(res[0])
@@ -198,33 +202,88 @@ class Api:
             return {"count": count, "warnings": warnings,
                     "pages": sorted(before | self.editor.edited_pages), "state": self._state()}
 
-    # ------------------------------------------------------------ saving
-    def _default_name(self):
-        p = Path(self.editor.path)
-        return p.stem + " (edited).pdf"
+    # ------------------------------------------------------------ dialogs
+    def _front(self):
+        """Bring the app forward so a native dialog shows where the user is (macOS)."""
+        if sys.platform != "darwin":
+            return
+        try:
+            import AppKit
+            from PyObjCTools import AppHelper
+            AppHelper.callAfter(lambda: AppKit.NSApp.activateIgnoringOtherApps_(True))
+        except Exception:
+            pass
 
-    def save(self, choose=False):
-        """Save a copy. First time (or choose=True) asks where; later saves update that copy."""
+    def confirm(self, title, message):
+        """Yes/no question in a native dialog. Never call from a window event handler."""
+        if not self.window:
+            return True
+        self._front()
+        return bool(self.window.create_confirmation_dialog(title, message))
+
+    # ------------------------------------------------------------ saving
+    def _default_copy(self) -> Path:
+        """'<name> (edited).pdf' next to the original, numbered if that name is taken."""
+        p = Path(self.editor.path)
+        cand, n = p.with_name(f"{p.stem} (edited).pdf"), 2
+        while cand.exists():
+            cand, n = p.with_name(f"{p.stem} (edited {n}).pdf"), n + 1
+        return cand
+
+    def _write(self, target: str):
         with self._lock:
-            target = self.save_path
-            if choose or not target:
-                if self.window:
-                    import webview
-                    res = self.window.create_file_dialog(
-                        webview.SAVE_DIALOG, directory=str(Path(self.editor.path).parent),
-                        save_filename=self._default_name())
-                    if not res:
-                        return {"cancelled": True}
-                    target = res if isinstance(res, str) else res[0]
-                else:  # browser dev mode
-                    out = Path.cwd() / "out"
-                    out.mkdir(exist_ok=True)
-                    target = str(out / self._default_name())
-            if not target.lower().endswith(".pdf"):
-                target += ".pdf"
             try:
                 self.editor.save(target)
             except Exception as ex:
                 return {"error": f"Couldn't save: {ex}"}
             self.save_path = target
             return {"path": target, "name": Path(target).name, "state": self._state()}
+
+    def save(self, choose=False):
+        """Save a copy without asking: '<name> (edited).pdf' next to the original, updated on
+        later saves. With choose=True, ask where (Save as)."""
+        if not self.editor:
+            return {"error": "Open a PDF first."}
+        if choose:
+            return self.save_as()
+        if self.save_path:
+            return self._write(self.save_path)
+        target = self._default_copy()
+        if not os.access(target.parent, os.W_OK):
+            return self.save_as()  # e.g. a read-only folder: let the user pick
+        return self._write(str(target))
+
+    def save_as(self):
+        p = Path(self.editor.path)
+        if self.window:
+            import webview
+            self._front()
+            kind = getattr(getattr(webview, "FileDialog", None), "SAVE", None) or webview.SAVE_DIALOG
+            res = self.window.create_file_dialog(kind, directory=str(p.parent),
+                                                 save_filename=p.stem + " (edited).pdf")
+            if not res:
+                return {"cancelled": True}
+            target = res if isinstance(res, str) else res[0]
+        else:  # browser dev mode
+            out = Path.cwd() / "out"
+            out.mkdir(exist_ok=True)
+            target = str(out / (p.stem + " (edited).pdf"))
+        if not target.lower().endswith(".pdf"):
+            target += ".pdf"
+        return self._write(target)
+
+    def reveal(self):
+        """Show the saved copy in Finder / Explorer."""
+        if not self.save_path:
+            return False
+        import subprocess
+        try:
+            if sys.platform == "darwin":
+                subprocess.Popen(["open", "-R", self.save_path])
+            elif sys.platform == "win32":
+                subprocess.Popen(["explorer", "/select,", self.save_path])
+            else:
+                subprocess.Popen(["xdg-open", str(Path(self.save_path).parent)])
+            return True
+        except OSError:
+            return False

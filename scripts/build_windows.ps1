@@ -18,7 +18,13 @@ if (-not (Test-Path dist)) { New-Item -ItemType Directory dist | Out-Null }
   --add-data "localpdf\fonts;localpdf\fonts" `
   --collect-all webview `
   --hidden-import clr `
+  --exclude-module pymupdf.layout --exclude-module pymupdf_layout --exclude-module pymupdf4llm `
+  --exclude-module onnxruntime --exclude-module networkx --exclude-module tabulate --exclude-module numpy `
   run_localpdf.py
+
+# fail the build if the packaged app can't open, edit and save a PDF
+$test = Start-Process -FilePath "dist\LocalPDF\LocalPDF.exe" -ArgumentList "--self-test" -Wait -PassThru
+if ($test.ExitCode -ne 0) { throw "Self-test of the packaged app failed" }
 
 $Iscc = @("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "$env:ProgramFiles\Inno Setup 6\ISCC.exe", "$env:LOCALAPPDATA\Programs\Inno Setup 6\ISCC.exe") |
   Where-Object { Test-Path $_ } | Select-Object -First 1

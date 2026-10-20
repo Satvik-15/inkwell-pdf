@@ -30,9 +30,14 @@
   }
   const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
 
-  function toast(msg, kind = "ok", ms = 3200) {
+  function toast(msg, kind = "ok", ms = 3200, action = null) {
     const t = el("div", `toast ${kind}`);
     t.append(icon(kind === "error" ? "alert-triangle" : kind === "warn" ? "alert-triangle" : "check"), el("span", null, msg));
+    if (action) {
+      const b = el("button", "toast-action", action.label);
+      b.onclick = () => { action.run(); t.remove(); };
+      t.append(b);
+    }
     $("#toasts").append(t);
     setTimeout(() => t.remove(), ms);
   }
@@ -494,7 +499,7 @@
     if (r.cancelled) return;
     if (r.error) { toast(r.error, "error", 5000); return; }
     S.doc = r.state; updateChrome();
-    toast(`Saved as ${r.name}`, "ok");
+    toast(`Saved as ${r.name}`, "ok", 6000, isDesktop() ? { label: "Show", run: () => call("reveal") } : null);
   }
 
   // ------------------------------------------------------------- find
@@ -605,7 +610,12 @@
   // ------------------------------------------------------------- misc actions
   function toggleSidebar() { $("#sidebar").classList.toggle("collapsed"); if (S.fitMode) setTimeout(fitWidth, 0); }
   async function closeDoc() {
-    if (S.doc && S.doc.dirty && !window.confirm("Close without saving? Your edits haven't been saved to a copy.")) return;
+    if (S.doc && S.doc.dirty) {
+      const ok = isDesktop()
+        ? await call("confirm", "Close without saving?", "Your edits haven't been saved to a copy yet.")
+        : window.confirm("Close without saving? Your edits haven't been saved to a copy yet.");
+      if (!ok) return;
+    }
     showWelcome(await call("close"));
     S.doc = null;
   }
